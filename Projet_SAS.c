@@ -36,9 +36,6 @@ typedef struct //hada struct li atsouwb bih reclamations
     reclamation reclamations[max_reclamation];
     int reclamation_count = 0;
 
-    FILE *reclamation_library;
-    FILE *users_library;
-
     int logged_account;
 
 void sign_up();
@@ -59,11 +56,11 @@ int main()
     
     do 
     {
-    printf("|----------------------Main Menu----------------------|\n");
-    printf("|                      1-Sign Up:                     |\n");
-    printf("|                      2-Log In:                      |\n");
-    printf("|                       3-Exit:                       |\n");
-    printf("|                  enter an option: ");
+    printf("Main Menu\n");
+    printf("1-Sign Up:\n");
+    printf("2-Log In:\n");
+    printf("3-Exit\n");
+    printf("enter an option: ");
         scanf("%d", &option);
         switch (option)
         {
@@ -109,7 +106,7 @@ void sign_up()
             printf("enter a password: ");
             scanf("%19s", new_account.password);
 
-            int has_uppercase = 0, has_lowercase = 0, has_number = 0, has_special_char = 0;
+            int has_uppercase = 0, has_lowercase = 0, has_number = 0, has_special_char = 0, has_username = 1;
             int len = strlen(new_account.password);
 
             if (len >= 8) 
@@ -132,10 +129,12 @@ void sign_up()
                     {
                         has_special_char = 1;
                     }
+                    strstr(new_account.password,new_account.username);
                 }
+
             }
 
-                pass_valid = (has_uppercase && has_lowercase && has_number && has_special_char) ? 1 : 0;
+                pass_valid = (has_uppercase && has_lowercase && has_number && has_special_char && has_username) ? 1 : 0;
 
                 if (pass_valid == 1) {
                     printf("Password is valid.\n");
@@ -196,8 +195,8 @@ void log_in() {
                 } 
                 else 
                 {
+                    printf("Invalid username or password.\nyou have (%d/3) uses left\n",failed - 1);
                     failed--;
-                    printf("Invalid username or password.\nyou have (%d/3) uses left\n",failed);
                     
                 }
 
@@ -216,18 +215,170 @@ void log_in() {
     }
 }
 
-void reclamation_fct()
+void admin() {
+    printf("--------------------------------\n");
+
+    int option_admin;
+    printf("Admin Menu:\n");
+    printf("1-change role:\n");
+    printf("2-see all reclamations\n");
+    printf("3-afficher les utilisateurs:\n");
+    printf("4-trouver une reclamation:\n");
+    printf("5-logout:\n");
+    printf("enter an option: ");
+    scanf("%d",&option_admin);
+    do 
+    {
+        switch (option_admin)
+        {
+        case 1:
+            change_role();
+            break;
+        case 2:
+        if (reclamation_count > 0)
+        {
+            for (int i = 0; i < reclamation_count; i++)
+            {
+                printf("Motif: %s\tID: %s\n",reclamations[i].Motif, reclamations[i].id);
+            }
+        }
+        else
+        {
+            printf("no reclamation available.");
+        }
+                
+            
+            break;
+        case 3:
+            for (int i = 0; i < existing_accounts; i++) 
+            {
+                printf("%d- %s\n", i + 1, accounts[i].username);
+            }
+            break;
+        case 4:
+            break;
+        case 5:
+        logged_account = -1;
+            main();
+            break;
+        default:
+            printf("invalid option\n");
+            break;
+        }
+    } while (option_admin != 5);
+    
+}
+
+void change_role() {
+    printf("--------------------------------\n");
+
+    printf("Select a user to change role:\n");
+    for (int i = 0; i < existing_accounts; i++) {
+        printf("%d - %s\n", i + 1, accounts[i].username);
+    }
+    
+    int user_index;
+    printf("Enter the number of the user: ");
+    scanf("%d", &user_index);
+    
+    if (user_index > 0 && user_index <= existing_accounts) {
+        printf("Enter new role (1 - admin, 2 - agent, 0 - client): ");
+        int new_role;
+        scanf("%d", &new_role);
+        
+        if (new_role >= 0 && new_role <= 2) {
+            accounts[user_index - 1].role = new_role;
+            printf("Role changed successfully.\n");
+        } else {
+            printf("Invalid role. Please try again.\n");
+        }
+    } else {
+        printf("Invalid user selection. Please try again.\n");
+    }
+    
+    return;
+}
+
+void agent() {
+    printf("--------------------------------\n");
+
+    int option_agent;
+    printf("Agent Menu\n");
+    printf("1-entrez une reclamation  :\n");
+    printf("2-modifier une reclamation :\n");
+    printf("3-suprimer une reclamation :\n");
+    printf("4-logout: \n");
+    printf("entrez une option: ");
+    scanf("%d",option_agent);
+    switch (option_agent)
+    {
+    case 4:
+        logged_account = -1;
+        main();
+        break;
+    
+    default:
+        printf("option invalide\n");
+        break;
+    }
+}
+
+void client() {
+    int option_client;
+    do
+    {
+    printf("--------------------------------\n");
+    printf("Client Menu\n");
+    printf("1-entrez une reclamation:\n");
+    printf("2-modifier une reclamation:\n");
+    printf("3-suprimer une reclamation:\n");
+    printf("4-log out:\n");
+    printf("entrez une option: ");
+    scanf("%d",&option_client);
+
+    switch (option_client)
+    {
+    case 1:
+        if (reclamation_count != max_reclamation)
+        {
+           reclamation_fct();
+        }
+        else
+        {
+            printf("le num des reclamation a acceder le max.\n");
+        }
+        break;
+    case 4:
+        logged_account = -1;
+        main();
+        break;
+
+    default:
+        printf("option invalid \n");
+        break;
+        }
+    } while (option_client != 4);
+}
+
+void reclamation_fct() 
 {
+    printf("--------------------------------\n");
+
     reclamation new_reclamation;
     account logged_rn = accounts[logged_account];
 
-    printf("entrez le motif de la reclamation: ");
-    fgets(new_reclamation.Motif,max_motif,stdin);
+    printf("entrez le motif de la reclamation: \n");
+    getchar();
+    fgets(new_reclamation.Motif, max_motif - 1, stdin);
+    new_reclamation.Motif[strcspn(new_reclamation.Motif, "\n")] = '\0'; // remove newline character
 
     printf("entrez la description de ton probleme:\n");
-    fgets(new_reclamation.description,max_description,stdin);
+    fgets(new_reclamation.description, max_description - 1, stdin);
+    new_reclamation.description[strcspn(new_reclamation.description, "\n")] = '\0'; // remove newline character
 
-    strcpy(new_reclamation.status,"en cours");
+    strcpy (new_reclamation.username, logged_rn.username);
+
+    strcpy(new_reclamation.status, "en cours");
 
             srand(time(NULL));
                 int num;
@@ -255,132 +406,5 @@ void reclamation_fct()
                         }
                 } while (id_existed == 1);
     reclamations[reclamation_count]  = new_reclamation; //dkhl lreclamation fl array
-    reclamation_count++;
-    
-}
-
-void admin() {
-    int option_admin;
-    printf("|---------------------Admin Menu---------------------|\n");
-    printf("|                   1-change role                    |\n");
-    printf("|               2-see all reclamations               |\n");
-    printf("|             3-afficher les utilisateurs            |\n");
-    printf("|              4-trouver une reclamation             |\n");
-    printf("|                      5-logout                      |\n");
-    printf("|                  enter an option: ");
-    scanf("%d",&option_admin);
-    do 
-    {
-        switch (option_admin)
-        {
-        case 1:
-            change_role();
-            break;
-        case 2:
-
-            break;
-        case 3:
-            for (int i = 0; i < existing_accounts; i++) 
-            {
-                printf("%d- %s\n", i + 1, accounts[i].username);
-            }
-            break;
-        case 4:
-            break;
-        case 5:
-            printf("you are logged out\n");
-            main();
-            break;
-        default:
-            printf("invalid option\n");
-            break;
-        }
-    } while (option_admin != 5);
-    
-}
-
-void change_role()
-{
-    printf("Select a user to change role:\n");
-    for (int i = 0; i < existing_accounts; i++) 
-    {
-        printf("%d- %s\n", i + 1, accounts[i].username);
-    }
-    int user_index;
-    printf("Enter the number of the user: ");
-    scanf("%d", &user_index);
-    if (user_index > 0 && user_index <= existing_accounts) 
-    {
-        printf("Enter new role (1-admin, 2-agent, 0-client): ");
-        int new_role;
-        scanf("%d", &new_role);
-        if (new_role >= 0 && new_role <= 2) 
-        {
-            accounts[user_index - 1].role = new_role;
-            printf("Role changed successfully.\n");
-            return;
-        } 
-        else 
-        {
-            printf("Invalid role. Please try again.\n");
-        }
-    } else {
-        printf("Invalid user selection. Please try again.\n");
-    }
-    return;
-}
-
-void agent() {
-    int option_agent;
-    printf("|---------------------Agent Menu---------------------|\n");
-    printf("|              1-entrez une reclamation              |\n");
-    printf("|             2-modifier une reclamation             |\n");
-    printf("|             3-suprimer une reclamation             |\n");
-    printf("|                      4-logout                      |\n");
-    printf("|                  enter an option: ");
-    scanf("%d",option_agent);
-    switch (option_agent)
-    {
-    case 1:
-        reclamation_fct();
-        break;
-    
-    default:
-        printf("invalid option\n");
-        break;
-    }
-}
-
-void client() {
-    int option_client;
-    do
-    {
-    printf("|--------------------Client Menu---------------------|\n");
-    printf("|              1-entrez une reclamation              |\n");
-    printf("|             2-modifier une reclamation             |\n");
-    printf("|             3-suprimer une reclamation             |\n");
-    printf("|                      4-logout                      |\n");
-    printf("|                  enter an option: ");
-    scanf("%d",option_client);
-    switch (option_client)
-    {
-    case 1:
-        if (reclamation_count == max_reclamation)
-        {
-            printf("le num des reclamation a acceder le max.\n");
-        }
-        else
-        {
-            reclamation_fct();
-        }
-        break;
-    case 4:
-        main();
-        break;
-
-    default:
-        printf("invalid option\n");
-        break;
-        }
-    } while (option_client != 5);
+    reclamation_count++;    
 }
