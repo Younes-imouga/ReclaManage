@@ -17,11 +17,6 @@ typedef struct //hada howa struct li aytsouwb bih laccounts
     char username[max_name];
     char password[max_password];
     int role;
-
-    char name[max_name];
-    char address[max_name];
-    char phone[max_name];
-    char email[max_name];
 } account;
 
 typedef struct //hada struct li atsouwb bih reclamations
@@ -33,8 +28,7 @@ typedef struct //hada struct li atsouwb bih reclamations
     char status[10];
     time_t time;
     char *date;
-    char priority [10];   // 0 basse / 3 moyenne / 5 haute
-    int priority_number;
+    char priority [10];
     char category[10];
     char note;
 
@@ -73,21 +67,20 @@ void load_users_from_file();
 void save_reclamations_to_file();
 void load_reclamations_from_file();
 
-int main() 
+int main()
 {
     int option = 0;
-    load_users_from_file();
-    load_reclamations_from_file();
-    
-    do 
+
+    do
     {
+        load_reclamations_from_file();
         printf("Main Menu\n");
         printf("1-Sign Up:\n");
         printf("2-Log In:\n");
         printf("3-Exit\n");
         printf("enter an option: ");
         scanf("%d", &option);
-        getchar(); 
+        getchar();
         switch (option)
         {
             case 1:
@@ -103,31 +96,31 @@ int main()
                 printf("option not found.\n");
                 break;
         }
-        
-           
+
+
     } while (option != 3);
 }
 
-void sign_up() 
+void sign_up()
 {
     account new_account;
     int pass_valid;
 
-        if (max_users > existing_accounts) 
+        if (max_users > existing_accounts)
         {
             printf("enter a username: ");
             scanf("%19s", new_account.username);
 
-                    for (int i = 0; i < existing_accounts; i++) 
+                    for (int i = 0; i < existing_accounts; i++)
                     {
-                        if (strcmp(accounts[i].username, new_account.username) == 0) 
+                        if (strcmp(accounts[i].username, new_account.username) == 0)
                         {
                                 printf("Username already exists!\n");
                                 return;
                         }
                     }
 
-            do 
+            do
             {
             printf("enter a password: ");
             scanf("%19s", new_account.password);
@@ -135,23 +128,23 @@ void sign_up()
             int has_uppercase = 0, has_lowercase = 0, has_number = 0, has_special_char = 0, has_username = 0;
             int len = strlen(new_account.password);
 
-            if (len >= 8) 
+            if (len >= 8)
             {
-                for (int i = 0; i < len; i++) 
+                for (int i = 0; i < len; i++)
                 {
-                    if (new_account.password[i] >= '0' && new_account.password[i] <= '9') 
+                    if (new_account.password[i] >= '0' && new_account.password[i] <= '9')
                     {
                         has_number = 1;
                     }
-                    else if (new_account.password[i] >= 'a' && new_account.password[i] <= 'z') 
+                    else if (new_account.password[i] >= 'a' && new_account.password[i] <= 'z')
                     {
                         has_lowercase = 1;
                     }
-                    else if (new_account.password[i] >= 'A' && new_account.password[i] <= 'Z') 
+                    else if (new_account.password[i] >= 'A' && new_account.password[i] <= 'Z')
                     {
                         has_uppercase = 1;
                     }
-                    else 
+                    else
                     {
                         has_special_char = 1;
                     }
@@ -165,21 +158,21 @@ void sign_up()
 
                 pass_valid = (has_uppercase && has_lowercase && has_number && has_special_char && has_username) ? 1 : 0;
 
-                if (pass_valid == 1) 
+                if (pass_valid == 1)
                 {
                 }
-                else 
+                else
                 {
                     printf("Password is invalid. It must be at least 8 characters long and must contain maj, min, num, and special char.\n");
                 }
             } while (pass_valid == 0);
 
                     //make the role      1->admin    2->agent   0->client
-            if (existing_accounts == 0) 
+            if (existing_accounts == 0)
             {
                 new_account.role = 1;
-            } 
-            else 
+            }
+            else
             {
                 new_account.role = 0;
             }
@@ -188,29 +181,30 @@ void sign_up()
             save_users_to_file();
             printf("account created successfully.\n");
             printf("your acc info are:\nuser: %s\tpassword: %s\n", new_account.username, new_account.password);
-        } 
-        else 
+        }
+        else
         {
             printf("max number of users has reached\n");
         }
 }
 
-void log_in() { 
+void log_in() {
     char user_name[max_name];
     char password[max_password];
     int login_successful = 0;
     int failed = 3;
+    load_reclamations_from_file();
 
     if (existing_accounts > 0) {
 
-        do 
+        do
         {
             printf("Enter username: ");
             scanf("%19s", user_name);
             printf("Enter password: ");
             scanf("%19s", password);
 
-            for (int i = 0; i < existing_accounts; i++) 
+            for (int i = 0; i < existing_accounts; i++)
             {
                 if (strcmp(accounts[i].username, user_name) == 0 && strcmp(accounts[i].password, password) == 0) {
                     printf("Login successful!\n");
@@ -228,7 +222,7 @@ void log_in() {
                         case 0:
                             client();
                             break;
-                        
+
                         default:
                             break;
                         }
@@ -243,7 +237,7 @@ void log_in() {
                 failed--;
             }
 
-            if (failed == 0) 
+            if (failed == 0)
             {
                 printf("you failed 3 times, you can try again after 30:00");
                 sleep(1800);
@@ -251,17 +245,17 @@ void log_in() {
 
             login_successful = 0;
         } while (failed > 0);
-    } 
-    else 
+    }
+    else
     {
-        printf("No users exist.");
+        printf("No users exist.\n");
     }
 }
 
 void admin() {
 
     int option_admin;
-    do 
+    do
     {
     printf("--------------------------------\n");
     printf("Admin Menu:\n");
@@ -281,7 +275,7 @@ void admin() {
             reclamation_fct();
             break;
         case 2:
-            for (int i = 0; i < existing_accounts; i++) 
+            for (int i = 0; i < existing_accounts; i++)
             {
                 printf("%d- %s\n", i + 1, accounts[i].username);
             }
@@ -300,7 +294,7 @@ void admin() {
                 printf("no reclamation available.");
             }
             break;
-                
+
         case 4:
             change_role();
             break;
@@ -311,7 +305,7 @@ void admin() {
 
         case 6:
             traiter_reclamation();
-            
+
         case 7:
         logged_account = -1;
             return;
@@ -321,7 +315,7 @@ void admin() {
             break;
         }
     } while (option_admin != 5);
-    
+
 }
 
 void change_role() {
@@ -331,11 +325,11 @@ void change_role() {
     for (int i = 0; i < existing_accounts; i++) {
         printf("%d - %s\n", i + 1, accounts[i].username);
     }
-    
+
     int user_index;
     printf("Enter the number of the user: ");
     scanf("%d", &user_index);
-    
+
     if (user_index > 0 && user_index <= existing_accounts) {
         if (strcmp (accounts[user_index - 1].username, accounts[logged_account].username) == 0)
         {
@@ -346,25 +340,25 @@ void change_role() {
             printf("Enter new role (1 - admin, 2 - agent, 0 - client): ");
             int new_role;
             scanf("%d", &new_role);
-            
-            if (new_role >= 0 && new_role <= 2) 
+
+            if (new_role >= 0 && new_role <= 2)
             {
                 accounts[user_index - 1].role = new_role;
                 printf("Role changed successfully.\n");
-            } 
-            else 
+            }
+            else
             {
                 printf("Invalid role. Please try again.\n");
             }
         }
-        
-        
-    } 
-    else 
+
+
+    }
+    else
     {
         printf("Invalid user selection. Please try again.\n");
     }
-    
+
     return;
 }
 
@@ -385,7 +379,7 @@ void agent() {
         logged_account = -1;
         return;
         break;
-    
+
     default:
         printf("option invalide\n");
         break;
@@ -438,7 +432,7 @@ void client() {
     } while (option_client != 4);
 }
 
-void reclamation_fct() 
+void reclamation_fct()
 {
     printf("--------------------------------\n");
 
@@ -459,7 +453,7 @@ void reclamation_fct()
     {
         printf("%d-%s\n", i+1,category[i]);
     }
-    
+
     do
     {
         printf("choose a category: ");
@@ -475,9 +469,9 @@ void reclamation_fct()
         }
 
     } while (category_number < 1 || category_number > 4);
-    
 
-    
+
+
 
 
     strcpy (new_reclamation.username, logged_rn.username);
@@ -492,7 +486,7 @@ void reclamation_fct()
                 {
                     id_existed = 0 ; //hna kadir rest kol mra f loop
                         for (int i = 0;  i < 8; i++)
-                        {   
+                        {
                                 do //souwb hna iD
                                 {
                                     num = rand() % 123;
@@ -502,7 +496,7 @@ void reclamation_fct()
                         new_reclamation.id[8] = '\0';
                         for (int i = 0; i < existing_accounts; i++) //chof l ID wach jdid
                         {
-                            if (strcmp(new_reclamation.id, reclamations[i].id) == 0) 
+                            if (strcmp(new_reclamation.id, reclamations[i].id) == 0)
                             {
                                 id_existed = 1;
                                 break;
@@ -511,49 +505,40 @@ void reclamation_fct()
                 } while (id_existed == 1);
             new_reclamation.time = time(NULL);
             new_reclamation.date = ctime(&new_reclamation.time);
-        
+
             char haut [6][25]= {"blan","prioritaire","important","critique"};//urgent
             char moyen [6][25]= {"nadi","moyen","necessaire","crutial","Essentiel"};
 
             for (int i = 0; i < 6; i++)
-            {   
+            {
                 if (strstr(new_reclamation.description, haut[i]) != NULL)
                 {
-                    new_reclamation.priority_number += 3;
-                }
-
-                if (strstr(new_reclamation.description, moyen[i]) != NULL)
-                {
-                    new_reclamation.priority_number += 2;
-                }
-
-            }
-            if (new_reclamation.priority_number > 3)
-            {
-                strcpy(new_reclamation.priority, "base");
-            }
-            else if (new_reclamation.priority_number > 3 && new_reclamation.priority_number < 5)    
-            {
-                strcpy(new_reclamation.priority, "moyenne");
-            }
-            else if (new_reclamation.priority_number > 5)
-            {
                 strcpy(new_reclamation.priority, "haute");
+                }
+
+                else if (strstr(new_reclamation.description, moyen[i]) != NULL)
+                {
+                strcpy(new_reclamation.priority, "moyenne");
+                }
+                else
+                {
+                strcpy(new_reclamation.priority, "base");
+                }
             }
-            
-            
+
 
         printf("Your reclamation info are:\nMotif: %s\tID: %s\tStatus: %s\tDate: %s\tPriorite: %s\t",new_reclamation.Motif, new_reclamation.id, new_reclamation.status, new_reclamation.date, new_reclamation.priority);
         printf("Your username is: %s\tLA reclamation categorie est: %s\ndescription:\n%s\n", new_reclamation.username, new_reclamation.category, new_reclamation.description);
 
     reclamations[reclamation_count]  = new_reclamation; //dkhl lreclamation fl array
-    reclamation_count++;    
+    reclamation_count++;
     save_reclamations_to_file();
 }
 
-void traiter_reclamation() 
+
+void traiter_reclamation()
 {
-    if (reclamation_count == 0) 
+    if (reclamation_count == 0)
     {
         printf("No reclamation available.\n");
         return;
@@ -593,7 +578,7 @@ void traiter_reclamation()
         if (reclamation_count > 0)
         {
             search_reclamation();
-        }    
+        }
         break;
 
     case 3:
@@ -638,7 +623,7 @@ void traiter_reclamation()
                     }
                 }
             }
-            
+
         }
         else
         {
@@ -657,10 +642,10 @@ void traiter_reclamation()
         break;
     }
     } while (traiter_option != 5);
-    
+
 }
 
-void search_reclamation() 
+void search_reclamation()
 {
     int search_option;
     do
@@ -744,7 +729,7 @@ void search_reclamation()
                     printf("%s\t%s\n%s", reclamations[i].username, reclamations[i].category, reclamations[i].description);
                 }
             }
-        }   
+        }
         break;
 
     case 5:
@@ -790,7 +775,7 @@ void search_reclamation()
     }while (search_option != 4);
 }
 
-void modify_delete_reclamation() 
+void modify_delete_reclamation()
 {
     if (accounts[logged_account].role == 0)
     {
@@ -800,9 +785,9 @@ void modify_delete_reclamation()
         scanf("%d", &reclamation_id);
 
         int found = 0;
-        for (i = 0; i < reclamation_count; i++) 
+        for (i = 0; i < reclamation_count; i++)
         {
-            if (*reclamations[i].id == reclamation_id) 
+            if (*reclamations[i].id == reclamation_id)
             {
                 found = 1;
                 break;
@@ -854,56 +839,51 @@ void modify_delete_reclamation()
                     break;
             }
         }
-        else 
+        else
         {
             printf("Reclamation is not eligible for modification or deletion.\n");
         }
     }
-    
+
 }
 
-void print_by_priority() 
+void print_by_priority()
 {
-    //     for (int i = 0; i < reclamation_count; i++) 
-    // {
-    //     if (strcmp(reclamations[i].priority, "haut") == 0)
-    //     {
-    //     printf("Motif: %s\tID: %s\t%s\t%s",reclamations[i].Motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
-    //     printf("%s\t%s\n%s", reclamations[i].username, reclamations[i].category, reclamations[i].description);
-    //     }
-        
-    // }
-    //     for (int i = 0; i < reclamation_count; i++) 
-    // {
-    //     if (strcmp(reclamations[i].priority, "moyen") == 0)
-    //     {
-    //     printf("Motif: %s\tID: %s\t%s\t%s",reclamations[i].Motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
-    //     printf("%s\t%s\n%s", reclamations[i].username, reclamations[i].category, reclamations[i].description);
-    //     }
-        
-    // }
-    //     for (int i = 0; i < reclamation_count; i++) 
-    // {
-    //     if (strcmp(reclamations[i].priority, "base") == 0)
-    //     {
-    //     printf("Motif: %s\tID: %s\t%s\t%s",reclamations[i].Motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
-    //     printf("%s\t%s\n%s", reclamations[i].username, reclamations[i].category, reclamations[i].description);
-    //     }
-        
-    // }
-    for (int i = 0; reclamations[i].priority_number < reclamation_count; i++)
+    for (int i = 0; i < reclamation_count; i++)
     {
-        /* code */
+        if (strcmp(reclamations[i].priority, "haut") == 0)
+        {
+        printf("Motif: %s\tID: %s\t%s\t%s",reclamations[i].Motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
+        printf("%s\t%s\n%s", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+        }
+
     }
-    
+        for (int i = 0; i < reclamation_count; i++)
+    {
+        if (strcmp(reclamations[i].priority, "moyen") == 0)
+        {
+        printf("Motif: %s\tID: %s\t%s\t%s",reclamations[i].Motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
+        printf("%s\t%s\n%s", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+        }
+
+    }
+        for (int i = 0; i < reclamation_count; i++)
+    {
+        if (strcmp(reclamations[i].priority, "base") == 0)
+        {
+        printf("Motif: %s\tID: %s\t%s\t%s",reclamations[i].Motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
+        printf("%s\t%s\n%s", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+        }
+
+    }
 }
 
-void load_users_from_file() 
+void load_users_from_file()
 {
     FILE *file = fopen("users.txt", "r");
-    
+
     int i = 0;
-    while (i < max_users && fscanf(file, "%s %s %d\n", &accounts[i].username, &accounts[i].password, &accounts[i].role) != EOF) 
+    while (i < max_users && fscanf(file, "%s %s %d\n", &accounts[i].username, &accounts[i].password, &accounts[i].role) != EOF)
     {
     i++ ;
     }
@@ -912,15 +892,15 @@ void load_users_from_file()
 }
 
 
-void save_users_to_file() 
+void save_users_to_file()
 {
     FILE *file = fopen("users.txt", "w");
-    if (file == NULL) 
+    if (file == NULL)
     {
         printf("Error saving users to file.\n");
         return;
     }
-    for (int i = 0; i < existing_accounts; i++) 
+    for (int i = 0; i < existing_accounts; i++)
     {
         fprintf(file, "%s %s %d\n", accounts[i].username, accounts[i].password, accounts[i].role);
     }
@@ -931,7 +911,7 @@ void load_reclamations_from_file()
 {
     FILE *file = fopen("reclamations.txt", "r");
     int i = 0;
-    while (i < max_users && fscanf(file, "%s %s %s %s %s %s\n", reclamations[i].username, reclamations[i].Motif, reclamations[i].date, reclamations[i].status, reclamations[i].priority, reclamations[i].description) != EOF) 
+    while (i < max_users && fscanf(file, "%s %s %s %s %s %s\n", reclamations[i].username, reclamations[i].Motif, reclamations[i].date, reclamations[i].status, reclamations[i].priority, reclamations[i].description) != EOF)
     {
     i++ ;
     }
@@ -940,15 +920,15 @@ void load_reclamations_from_file()
 
 }
 
-void save_reclamations_to_file() 
+void save_reclamations_to_file()
 {
     FILE *file = fopen("reclamations.txt", "w");
-    if (file == NULL) 
+    if (file == NULL)
     {
         printf("Error saving reclamations to file.\n");
         return;
     }
-    for (int i = 0; i < reclamation_count; i++) 
+    for (int i = 0; i < reclamation_count; i++)
     {
         fprintf(file, "%s %s %s %s %s %s\n", reclamations[i].username, reclamations[i].Motif, reclamations[i].date, reclamations[i].status, reclamations[i].priority, reclamations[i].description);
     }
