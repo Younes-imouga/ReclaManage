@@ -240,8 +240,8 @@ void admin()
         printf("9-afficher le nombre des reclamation:\n");
         printf("10-afficher le taux de resolution: \n");
         printf("11-afficher le delai moyen: \n");
-
-        printf("12-Se deconnecter:\n");
+        printf("12-executer le rapport journalier: \n");
+        printf("13- quitter:\n");
 
         printf("Entrez une option: ");
         if (scanf("%d", &option_admin) != 1) 
@@ -321,19 +321,22 @@ void admin()
                 printf("le nombre des reclamation est: %d",reclamation_count);
                 break;
             case 10:
-            taux_de_resolution();
-            break;
+                taux_de_resolution();
+                break;
             case 11:
                 delai_moyen();
                 break;
             case 12:
+                Rapport_journalier();
+                break;
+            case 13:
                 logged_account = -1; 
                 return;
             default: 
                 printf("Option invalide\n"); 
                 break;
         }
-    } while (option_admin != 12);
+    } while (option_admin != 13);
 }
 
 void change_role() {
@@ -520,7 +523,12 @@ void client()
                         {
                             printf("\nMotif: %s\nID: %s\nStatus: %s\nDate: %s", reclamations[i].motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
                             printf("\nUser: %s\nCategorie: %s\nDescription: %s\n", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+                            break;
                         }
+                        else if (i == reclamation_count - 1) 
+                        {
+                            printf("Aucune reclamation disponible.\n");
+                        }   
                     }
                 }
                 else
@@ -644,7 +652,11 @@ void traiter_reclamation()
         printf("4 - Quitter\n");
 
         printf("Entrez une option: ");
-        scanf("%d", &traiter_option);
+        if (scanf("%d", &traiter_option) != 1) 
+        {
+            printf("Erreur: Veuillez entrer une option valide.\n");
+            while (getchar() != '\n'); 
+        }
 
         switch (traiter_option) 
         {
@@ -676,20 +688,22 @@ void traiter_reclamation()
             case 3:
                 if (reclamation_count > 0) 
                 {
+                    int num ;
+                    int choix = 0;
                     for (int i = 0; i < reclamation_count; i++) 
                     {
-                        printf("Motif: %s\nID: %s\nStatut: %s\nDate: %s", reclamations[i].motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
+                        printf("%d - Motif: %s\nID: %s\nStatut: %s\nDate: %s",choix + 1, reclamations[i].motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
                         printf("\nNom d'utilisateur: %s\nCategorie: %s\nDescription: %s\n", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+                    choix++;
                     }
                     printf("Choisissez une reclamation à traiter:\n");
-                    int num;
                     scanf("%d", &num);
                     if (num >= 1 && num <= reclamation_count) 
                     {
                         printf("Choisissez un statut:\n");
                         printf("1-En cours\n");
                         printf("2-Traite\n");
-                        printf("3-Rejete\n");
+                        printf("3-Rejette\n");
 
                         int status;
                         scanf("%d", &status);
@@ -701,16 +715,17 @@ void traiter_reclamation()
                          else if (status == 2) 
                         {
                             strcpy(reclamations[num - 1].status, "Traite");
+                            Traite++;
+                            reclamations[num - 1].status_changed = time(NULL);
+                            temps_total += difftime(reclamations[num - 1].time, reclamations[num - 1].status_changed);
                         } 
                         else if (status == 3) 
                         {
-                            strcpy(reclamations[num - 1].status, "Rejete");
+                            strcpy(reclamations[num - 1].status, "Rejette");
                         }
                         printf("entrez une note: ");
                         fgets(reclamations[num - 1].note, 100, stdin);
 
-                        reclamations[num - 1].status_changed = time(NULL);
-                        temps_total += difftime(reclamations[num - 1].time, reclamations[num - 1].status_changed);
                     }
                 }
                 else 
@@ -833,15 +848,43 @@ void search_reclamation()
  
     case 5:
         {
-            char search_status[10];
+            int search_status;
+            printf("\n1-En cours\n2-Resolu\n3-Annule\n");
             printf("entrez un status: ");
-            fgets(search_status, 10, stdin);
-            for (int i = 0; i < reclamation_count; i++)
+            if (scanf("%d", &search_status) != 1)
             {
-                if (strcmp(reclamations[i].status, search_status) == 0)
+                printf("Erreur: Veuillez entrer une option valide.\n");
+                while (getchar() != '\n');
+            }
+
+            for (int i = 0; i < reclamation_count; i++)
+            
+            {
+                switch (search_status)
                 {
-                    printf("Motif: %s\nID: %s\nStatut: %s\nDate: %s", reclamations[i].motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
-                    printf("\nNom d'utilisateur: %s\nCategorie: %s\nDescription: %s\n", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+                    case 1: 
+                    if (strcmp(reclamations[i].status, "en cours") == 0)
+                    {
+                        printf("Motif: %s\nID: %s\nStatut: %s\nDate: %s", reclamations[i].motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
+                        printf("\nNom d'utilisateur: %s\nCategorie: %s\nDescription: %s\n", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+                    }
+                    break;
+
+                    case 2:
+                    if (strcmp(reclamations[i].status, "resolu") == 0)
+                    {
+                        printf("Motif: %s\nID: %s\nStatut: %s\nDate: %s", reclamations[i].motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
+                        printf("\nNom d'utilisateur: %s\nCategorie: %s\nDescription: %s\n", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+                    }
+                    break;
+
+                    case 3:
+                    if (strcmp(reclamations[i].status, "rejeter") == 0)
+                    {
+                        printf("Motif: %s\nID: %s\nStatut: %s\nDate: %s", reclamations[i].motif, reclamations[i].id, reclamations[i].status, reclamations[i].date);
+                        printf("\nNom d'utilisateur: %s\nCategorie: %s\nDescription: %s\n", reclamations[i].username, reclamations[i].category, reclamations[i].description);
+                    }
+                    break;
                 }
             }
             return;
@@ -865,7 +908,7 @@ void modify_delete_reclamation()
         int found = 0;
         for (i = 0; i < reclamation_count; i++)
         {
-            if (strcmp(reclamations[i].id, reclamation_id) == 0)
+            if (strcmp(reclamations[i].id, reclamation_id) == 0 && strcmp(reclamations[i].username, accounts[logged_account].username) == 0)
             {
                 found = 1;
                 break;
@@ -875,9 +918,7 @@ void modify_delete_reclamation()
             printf("Reclamation non trouvee.\n");
             return;
         }
-        time_t current_time = time(NULL);
-        double time_diff = difftime(current_time, reclamations[i].time);
-        if (strcmp(reclamations[i].status, "en cours") == 0 && time_diff < max_time) 
+        if (strcmp(reclamations[i].status, "en cours") == 0 && difftime(time(NULL), reclamations[i].time) < max_time) 
         {
             printf("1-Modifier la reclamation\n");
             printf("2-Supprimer la reclamation\n");
@@ -1116,23 +1157,50 @@ void taux_de_resolution()
 
 void delai_moyen()
 {
-    temps_moyen = temps_total / reclamation_count;
-    printf("delai moyen: %d\n", temps_moyen);
+    temps_moyen = temps_total / Traite;
+    int temps_moyen_heur = temps_moyen / 3600;
+    int temps_moyen_minute = (temps_moyen % 3600) / 60;
+    int temps_moyen_seconde = temps_moyen % 60;
+
+    printf("delai moyen: %d : %d : %d\n", temps_moyen_heur, temps_moyen_minute, temps_moyen_seconde);
 }
 
 void Rapport_journalier()
 {
+    int en_cours = 0;
+    int rejeter = 0;
+
+    for (int i = 0; i < reclamation_count; i++)
+    {
+        if (strcmp(reclamations[i].status, "en cours"))
+        {
+            en_cours++;
+        }
+        if (strcmp(reclamations[i].status, "rejeter"))
+        {
+            rejeter++;
+        }
+        
+    }
+    
     FILE *file = fopen("rapport_quotidien.txt", "w");
     if (!file) 
     {
         printf("Erreur lors de la création du fichier.\n");
         return;
     }
-
+    else
+    {
     fprintf(file, "Rapport Quotidien des Réclamations\n");
     fprintf(file, "=================================\n\n");
 
     fprintf(file, "Nombre total de réclamations : %d\n", reclamation_count);
+    
+    fprintf(file, "Nombre total de réclamations en cours: %d\n", en_cours);
+    fprintf(file, "Nombre total de réclamations Traiter: %d\n", Traite);
+    fprintf(file, "Nombre total de réclamations rejeter: %d\n", rejeter);
+
+
     fprintf(file, "Taux de resolution des réclamations : %.2f%%\n", Traite * 100 / reclamation_count);
     fprintf(file, "Delai moyen de traitement des reclamations resolues : %.2f secondes\n", temps_moyen);
 
@@ -1140,4 +1208,14 @@ void Rapport_journalier()
 
     fclose(file);
     printf("Rapport quotidien genere avec succes.\n");
+    return;
+    }
 }
+
+// same name with upper case works it shouldn't damn it
+
+// client modification : when there's no claim it still tell you to choose an id
+
+// TRAITER LES RECLAMATION afficher les reclamation just add \n
+
+// fix search by status
